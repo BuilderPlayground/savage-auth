@@ -2,6 +2,7 @@
 
 // set up ======================================================================
 // get all the tools we need
+require('dotenv').config();
 var express  = require('express');
 var app      = express();
 var port     = process.env.PORT || 8080;
@@ -20,9 +21,9 @@ var configDB = require('./config/database.js');
 var db
 
 // configuration ===============================================================
-mongoose.connect(configDB.url, (err, database) => {
-  if (err) return console.log(err)
-  db = database
+mongoose.connect(configDB.url, { dbName: configDB.dbName }, (err) => {
+  if (err) return console.log(err);
+  db = mongoose.connection.db;
   require('./app/routes.js')(app, passport, db);
 }); // connect to our database
 
@@ -40,9 +41,9 @@ app.set('view engine', 'ejs'); // set up ejs for templating
 
 // required for passport
 app.use(session({
-    secret: 'rcbootcamp2021b', // session secret
-    resave: true,
-    saveUninitialized: true
+    secret: process.env.SESSION_SECRET, // session secret
+    resave: false,
+    saveUninitialized: false
 }));
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
